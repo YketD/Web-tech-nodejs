@@ -100,8 +100,25 @@ app.post('/api/rating', function (req, res) {
             });
         }
     })
+});
 
-})
+app.get('/api/rating', function (req, res){
+    var token = req.headers['authorization'];
+    jwt.verify(token, app.get('private-key'), function (err, decoded) {
+        if (err) {
+            res.send('invalid key, authorization failed!');
+        } else {
+            ratingModel.find(
+                {user: this.user},
+                {rating: 1, movie: 1},
+                function (err, results) {
+                    if (err) return console.error(err);
+                    res.send(results);
+                });
+        }
+    })
+});
+
 app.listen(3000, function () {
     console.log('example app listening');
 });
