@@ -10,10 +10,19 @@ var ratingadta = require('./api/Rating');
 var moviedata = require('./api/Movie.js');
 var userdata = require('./api/User.js');
 var headersSent = false;
-
-var jwt = require('jsonwebtoken');
-
 var app = express();
+
+app.set('private-key', 'wachtwoord');
+var jwt = require('jsonwebtoken');
+var testUser = {
+    achternaam: '1',
+    tussenVoegsels: '2',
+    voornaam: '3',
+    username: 'admin',
+    password: 'admin'
+};
+
+
 mongoose.connect('mongodb://localhost/notflix');
 
 
@@ -23,10 +32,12 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-app.set('private-key', 'wachtwoord');
 
-app.get('/token', function (req, res) {
-    res.send(token);
+
+app.get('/api/token', function (req, res) {
+    res.send(jwt.sign(testUser,
+        app.get('private-key'),
+        {expiresIn: '1440m'}));
 });
 
 app.get('/api/Movie', function (req, res) {
@@ -123,7 +134,7 @@ app.post('/api/rating', function (req, res) {
         } else {
             var rating = new ratingModel({
                 rating: req.body.rating,
-                gebruiker: user,
+                gebruiker: this,
                 movie: req.body.movie,
                 datum: Date.now()
             });
@@ -141,18 +152,22 @@ app.post('/api/rating', function (req, res) {
     })
 });
 
+app.get('/', function (req, res) {
+    res.send(201);
+})
+
 app.get('/api/rating', function (req, res) {
     var token = req.headers['authorization'];
     jwt.verify(token, app.get('private-key'), function (err, decoded) {
         if (err) {
-            res.send('invalid key, authorization failed!');
+            res.send(401, 'invalid key, authorization failed!');
         } else {
             ratingModel.find(
                 {user: this.user},
                 {rating: 1, movie: 1},
                 function (err, results) {
                     if (err) return console.error(err);
-                    res.send(results);
+                    res.send200, results);
                 });
         }
     })
