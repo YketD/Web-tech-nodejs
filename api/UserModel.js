@@ -7,8 +7,8 @@ var schema = mongoose.Schema;
 var userSchema = new schema({
     achternaam: {type: String, required: true},
     tussenvoegsels: {type: String, required: false},
-    voornaam: {type: Date, required: true},
-    username: {type: Number, required: true},
-    wachtwoord: {type: String, required: true},
+    voornaam: {type: String, required: true},
+    username: {type: String, required: true},
+    password: {type: String, required: true},
 });
 module.exports = mongoose.model('UserModel.js', userSchema);

@@ -8,11 +8,14 @@ var ratingModel = require('./api/RatingModel.js');
 var userModel = require('./api/UserModel');
 var ratingadta = require('./api/Rating');
 var moviedata = require('./api/Movie.js');
+var userdata = require('./api/User.js');
+var headersSent = false;
 
 var jwt = require('jsonwebtoken');
 
 var app = express();
 mongoose.connect('mongodb://localhost/notflix');
+
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
@@ -29,9 +32,9 @@ app.get('/token', function (req, res) {
 app.get('/api/Movie', function (req, res) {
     var token = req.headers['authorization'];
     jwt.verify(token, app.get('private-key'), function (err, decoded) {
-        if (err){
+        if (err) {
             res.send('invalid key, authorization failed!');
-        }   else{
+        } else {
             var title = 'title';
             var imdb = 'imdb';
             var date = 'date';
@@ -73,8 +76,9 @@ app.post('/api/register', function (req, res) {
         username: username,
         wachtwoord: password,
     })
-    if (req.body.tussenvoegsel != undefined){
-        newuser[tussenvoegsel] = req.body.tussenvoegsel;}
+    if (req.body.tussenvoegsel != undefined) {
+        newuser[tussenvoegsel] = req.body.tussenvoegsel;
+    }
     newuser.save(function (err, result) {
         if (err)
             console.log(err);
@@ -83,34 +87,48 @@ app.post('/api/register', function (req, res) {
     })
 });
 
-app.post('/api/login', function(req, res){
-    var result;
-    userModel.find({username: req.body.username, password: req.body.password}, {username:1}, function (err, result) {
+app.post('/api/login', function (req, res) {
+    var password = 'password';
+    var username = 'username';
+    var loginQuery = {};
+    loginQuery[password] = req.body.password;
+    loginQuery[username] = req.body.username;
+    userModel.find(loginQuery, {username: 1, password: 1}, function (err, result) {
         if (err) {
             console.log(err)
-        }else{
-            this.result = result;
+        } else {
+            if (result != undefined && result.username == loginQuery.username && result.password == loginQuery.password) {
+                res.send(jwt.sign(new userModel({
+                        achternaam: result.achternaam,
+                        tussenVoegsels: result.tussenVoegsels,
+                        voornaam: result.voornaam,
+                        username: result.username,
+                        password: result.password
+                    }),
+                    app.get('private-key'),
+                    {expiresIn: '1440m'}));
+                headersSent = true;
+
+            }
+
         }
-    } );
-    res.send(jwt.sign(result,
-        app.get('private-key'),
-        {expiresIn: '1440m'}))
+    });
 });
 
 app.post('/api/rating', function (req, res) {
     var token = req.headers['authorization'];
     jwt.verify(token, app.get('private-key'), function (err, decoded) {
-        if (err){
+        if (err) {
             res.send('invalid key, authorization failed!');
-        }   else{
-        var rating = new ratingModel({
-            rating: req.body.rating,
-            gebruiker: user,
-            movie: req.body.movie,
-            datum: Date.now()
+        } else {
+            var rating = new ratingModel({
+                rating: req.body.rating,
+                gebruiker: user,
+                movie: req.body.movie,
+                datum: Date.now()
             });
             rating.save(function (err, result) {
-                if (err){
+                if (err) {
                     return console.error(err);
                     res.sendStatus(401)
                 }
@@ -123,7 +141,7 @@ app.post('/api/rating', function (req, res) {
     })
 });
 
-app.get('/api/rating', function (req, res){
+app.get('/api/rating', function (req, res) {
     var token = req.headers['authorization'];
     jwt.verify(token, app.get('private-key'), function (err, decoded) {
         if (err) {
