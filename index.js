@@ -5,6 +5,7 @@ var mongoose = require('mongoose');
 var express = require('express');
 var movieModel = require('./api/moviemodel.js');
 var ratingModel = require('./api/RatingModel.js');
+var userModel = require('./api/UserModel');
 var ratingadta = require('./api/Rating');
 var moviedata = require('./api/Movie.js');
 
@@ -18,15 +19,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+
 app.set('private-key', 'wachtwoord');
-var user = {
-    "username": "admin",
-    "password": "admin"
-};
-var token = jwt.sign(user,
-    app.get('private-key'),
-    {expiresIn: '1440m'}
-);
 
 app.get('/token', function (req, res) {
     res.send(token);
@@ -68,12 +62,39 @@ app.get('/api/Movie', function (req, res) {
     });
 });
 
+app.post('/api/register', function (req, res) {
+    var username = req.body.username;
+    var password = req.body.password;
+    var voornaam = req.body.voornaam;
+    var achternaam = req.body.achternaam;
+    var newuser = new userModel({
+        achternaam: achternaam,
+        voornaam: voornaam,
+        username: username,
+        wachtwoord: password,
+    })
+    if (req.body.tussenvoegsel != undefined){
+        newuser[tussenvoegsel] = req.body.tussenvoegsel;}
+    newuser.save(function (err, result) {
+        if (err)
+            console.log(err);
+        else
+            console.log('user has been saved, log in with: ' + username + password);
+    })
+});
+
 app.post('/api/login', function(req, res){
-    if (user.username === req.body.username && user.password === req.body.password){
-        res.send(token);
-    }   else{
-        res.send('wrong username / password, try again! you tried:' + req.body.username + req.body.password);
-    }
+    var result;
+    userModel.find({username: req.body.username, password: req.body.password}, {username:1}, function (err, result) {
+        if (err) {
+            console.log(err)
+        }else{
+            this.result = result;
+        }
+    } );
+    res.send(jwt.sign(result,
+        app.get('private-key'),
+        {expiresIn: '1440m'}))
 });
 
 app.post('/api/rating', function (req, res) {
