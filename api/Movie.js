@@ -1,7 +1,7 @@
 /**
  * Created by yketd on 4-10-2016.
  */
-var Movie = require('./moviemodel.js');
+var Movie = require('./moviemodel');
 
 var post = new Movie({
     title: 'Deepwater Horizon',
@@ -10,7 +10,7 @@ var post = new Movie({
     length: 107,
     director: 'Peter Berg',
     description:'A dramatization of the April 2010 disaster when the offshore drilling rig,' +
-                'Deepwater Horizon, exploded and created the worst oil spill in U.S. history.'
+                'Deepwater Horizon, exploded and created the worst oil spill in U.S. history.',
 });
 
 post.save(function (err, result) {

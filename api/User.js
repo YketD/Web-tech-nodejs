@@ -22,7 +22,7 @@ post.save(function (err, result) {
             return false
 
         })) {
-        //handle user already exists
+
     }
     else
         console.log('usersave', "user has been saved succesfully, login with username= " + post.username + "& password= " + post.wachtwoord);

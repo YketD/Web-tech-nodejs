@@ -10,6 +10,7 @@ var movieSchema = new schema({
     date: {type: Date, required: true},
     length: {type: Number, required: true},
     director: {type: String, required: true},
-    description: {type: String, required: true}
+    description: {type: String, required: true},
+    averagerating: {type: Number, required: false}
 });
 module.exports = mongoose.model('moviemodel.js', movieSchema);

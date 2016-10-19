@@ -5,22 +5,14 @@ var mongoose = require('mongoose');
 var express = require('express');
 var movieModel = require('./api/moviemodel.js');
 var ratingModel = require('./api/RatingModel.js');
-var userModel = require('./api/UserModel');
-var ratingadta = require('./api/Rating');
-var moviedata = require('./api/Movie.js');
-var userdata = require('./api/User.js');
+var user = require('./api/UserModel');
+
+
 var headersSent = false;
 var app = express();
 
 app.set('private-key', 'wachtwoord');
 var jwt = require('jsonwebtoken');
-var testUser = {
-    achternaam: '1',
-    tussenVoegsels: '2',
-    voornaam: '3',
-    username: 'admin',
-    password: 'admin'
-};
 
 
 mongoose.connect('mongodb://localhost/notflix');
@@ -31,7 +23,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-
 
 
 app.get('/api/token', function (req, res) {
@@ -46,83 +37,104 @@ app.get('/api/Movie', function (req, res) {
         if (err) {
             res.send('invalid key, authorization failed!');
         } else {
-            var title = 'title';
-            var imdb = 'imdb';
-            var date = 'date';
-            var length = 'length';
-            var director = 'director';
-            var description = 'description';
+            // var currentuser;
+            // var userquery = {};
+            // userquery['username'] = token.username;
+            // ratingModel.findOne(
+            //     userquery,
+            //     {rating: 1},
+            //     function (err, results) {
+            //         if (err) res.status(401).send('user not found! contact an administrator')
+            //         currentuser = results;
+            //     }
+            // )
             var moviequery = {};
             if (req.query.title != undefined)
-                moviequery[title] = req.query.title;
+                moviequery['title'] = req.query.title;
             if (req.query.imdb != undefined)
-                moviequery[imdb] = req.query.imdb;
+                moviequery['imdb'] = req.query.imdb;
             if (req.query.date != undefined)
-                moviequery[date] = req.query.date;
+                moviequery['date'] = req.query.date;
             if (req.query.length != undefined)
-                moviequery[length] = req.query.length;
+                moviequery['length'] = req.query.length;
             if (req.query.director != undefined)
-                moviequery[director] = req.query.director;
+                moviequery['director'] = req.query.director;
             if (req.query.description != undefined)
-                moviequery[description] = req.query.description;
-            movieModel.find(
+                moviequery['description'] = req.query.description;
+            movieModel.findOne(
                 moviequery
-                , {title: 1},
-                function (err, results) {
-                    if (err) return console.error(err);
-                    res.send(results);
-                });
+                , {title: 1, description: 1, averagerating: 1},
+                function (err, results1) {
+                    if (err) res.status(400).send({message: err});
+                    else res.status(200).send({results: results1});
+                }
+            );
+
+
         }
-    });
+    })
 });
+
+app.get('/api/users', function (req, res) {
+    user.find(
+        function (err, result1) {
+            if (err) res.status(401).send({error: err})
+            else res.status(200).send({result: result1})
+        }
+    )
+})
 
 app.post('/api/register', function (req, res) {
-    var username = req.body.username;
-    var password = req.body.password;
-    var voornaam = req.body.voornaam;
-    var achternaam = req.body.achternaam;
-    var newuser = new userModel({
-        achternaam: achternaam,
-        voornaam: voornaam,
-        username: username,
-        wachtwoord: password,
-    })
-    if (req.body.tussenvoegsel != undefined) {
-        newuser[tussenvoegsel] = req.body.tussenvoegsel;
-    }
-    newuser.save(function (err, result) {
+
+    var user1 = new user({
+        'achternaam' : req.body.achternaam,
+        'voornaam': req.body.voornaam,
+        'username': req.body.username,
+        'password': req.body.password
+    });
+
+    if (req.body.tussenvoegsel != 'undefined')
+        user1['tussenvoegsel'] = req.body.tussenvoegsel;
+
+    user.ensureIndex
+    user1.save(function (err, result) {
         if (err)
-            console.log(err);
-        else
-            console.log('user has been saved, log in with: ' + username + password);
-    })
-});
+            res.status(401).send({error: err});
+        else {
+
+            var token = jwt.sign(user1,
+                app.get('private-key'),
+                {expiresIn: '1440m'});
+            res.status(201).send({
+                message: 'registration valid, login with:', result: result,
+                key: token})
+            }
+        })
+    });
+
 
 app.post('/api/login', function (req, res) {
-    var password = 'password';
-    var username = 'username';
-    var loginQuery = {};
-    loginQuery[password] = req.body.password;
-    loginQuery[username] = req.body.username;
-    userModel.find(loginQuery, {username: 1, password: 1}, function (err, result) {
+    var loginQuery = {}
+    loginQuery['password'] = req.body.password;
+    loginQuery['username'] = req.body.username;
+    userModel.findOne(loginQuery, {}, function (err, result) {
         if (err) {
             console.log(err)
         } else {
-            if (result != undefined && result.username == loginQuery.username && result.password == loginQuery.password) {
-                res.send(jwt.sign(new userModel({
-                        achternaam: result.achternaam,
-                        tussenVoegsels: result.tussenVoegsels,
-                        voornaam: result.voornaam,
-                        username: result.username,
-                        password: result.password
-                    }),
-                    app.get('private-key'),
-                    {expiresIn: '1440m'}));
-                headersSent = true;
-
-            }
-
+            if (result != null) {
+                if (result.username == loginQuery.username && result.password == loginQuery.password) {
+                    res.status(200).send({
+                        key: jwt.sign(result,
+                            app.get('private-key'),
+                            {expiresIn: '1440m'})
+                    });
+                    headersSent = true;
+                }
+            } else
+                res.send(401, "wrong username/password")
         }
+
+
     });
 });
 
@@ -140,8 +152,7 @@ app.post('/api/rating', function (req, res) {
             });
             rating.save(function (err, result) {
                 if (err) {
-                    return console.error(err);
-                    res.sendStatus(401)
+                    res.status(401).send({error: err})
                 }
                 else {
                     console.log('ratingmodel', "rating has been saved succesfully, result + " + result);
@@ -152,8 +163,22 @@ app.post('/api/rating', function (req, res) {
     })
 });
 
+app.get('/api/oneMovietest', function (req, res) {
+    testQuery = {};
+    testQuery['title'] = req.body.title;
+    testQuery['imdb'] = req.body.imdb;
+    movieModel.findOne(
+        testQuery,
+        {title: 1},
+        function (err, result) {
+            if (err) res.send('Error! : ' + err);
+            res.send(result.title + typeof result)
+        }
+    )
+})
+
 app.get('/', function (req, res) {
-    res.send(201);
+res.send('hallo, hier komt de website')
 })
 
 app.get('/api/rating', function (req, res) {
@@ -167,7 +192,7 @@ app.get('/api/rating', function (req, res) {
                 {rating: 1, movie: 1},
                 function (err, results) {
                     if (err) return console.error(err);
-                    res.send200, results);
+                    res.send(200, results);
                 });
         }
     })

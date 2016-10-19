@@ -3,12 +3,17 @@
  */
 var mongoose = require('mongoose');
 var schema = mongoose.Schema;
+var uniqueValidator = require('mongoose-unique-validator');
+
+
 
 var userSchema = new schema({
     achternaam: {type: String, required: true},
-    tussenvoegsels: {type: String, required: false},
+    tussenvoegsel: {type: String, required: false},
     voornaam: {type: String, required: true},
-    username: {type: String, required: true},
-    password: {type: String, required: true},
+    username: {type: String, unique: true, required: true},
+    password: {type: String, required: true}
 });
+userSchema.plugin(uniqueValidator);
+
 module.exports = mongoose.model('UserModel.js', userSchema);
