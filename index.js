@@ -6,6 +6,7 @@ var express = require('express');
 var movieModel = require('./api/moviemodel.js');
 var ratingModel = require('./api/RatingModel.js');
 var user = require('./api/UserModel');
+var path = require('path')
 
 
 var headersSent = false;
@@ -112,12 +113,11 @@ app.post('/api/register', function (req, res) {
         })
     });
 
-
 app.post('/api/login', function (req, res) {
     var loginQuery = {}
     loginQuery['password'] = req.body.password;
     loginQuery['username'] = req.body.username;
-    userModel.findOne(loginQuery, {}, function (err, result) {
+    user.findOne(loginQuery, {}, function (err, result) {
         if (err) {
             console.log(err)
         } else {
@@ -131,7 +131,7 @@ app.post('/api/login', function (req, res) {
                     headersSent = true;
                 }
             } else
-                res.send(401, "wrong username/password")
+                res.sendFile(path.join(__dirname + '/web-module/web/login.html')).setRequestHeader("")
         }
 
 
@@ -178,7 +178,7 @@ app.get('/api/oneMovietest', function (req, res) {
 })
 
 app.get('/', function (req, res) {
-res.send('hallo, hier komt de website')
+    res.sendFile(path.join(__dirname + '/web-module/web/index.html'))
 })
 
 app.get('/api/rating', function (req, res) {
@@ -197,6 +197,10 @@ app.get('/api/rating', function (req, res) {
         }
     })
 });
+
+app.get('/login', function (req, res) {
+    res.sendFile(path.join(__dirname + '/web-module/web/login.html'))
+})
 
 app.listen(3000, function () {
     console.log('example app listening');
