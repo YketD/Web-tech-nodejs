@@ -24,6 +24,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.use(express.static("public"));
 
 
 app.get('/api/token', function (req, res) {
@@ -131,7 +132,7 @@ app.post('/api/login', function (req, res) {
                     // headersSent = true;
                 }
             } else
-                res.status(400);
+                res.status(400).send();
         }
     });
 });
