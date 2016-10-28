@@ -124,17 +124,15 @@ app.post('/api/login', function (req, res) {
             if (result != null) {
                 if (result.username == loginQuery.username && result.password == loginQuery.password) {
                     res.status(200).send({
-                        key: jwt.sign(result,
+                        token: jwt.sign(result,
                             app.get('private-key'),
                             {expiresIn: '1440m'})
                     });
-                    headersSent = true;
+                    // headersSent = true;
                 }
             } else
-                res.sendFile(path.join(__dirname + '/web-module/web/login.html')).setRequestHeader("")
+                res.status(400);
         }
-
-
     });
 });
 
