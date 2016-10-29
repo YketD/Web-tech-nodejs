@@ -6,7 +6,7 @@ var UserModel = require('./UserModel');
 
 var defaultrating = new Rating({
     rating: 0,
-    gebruiker: UserModel.find() ,
+    user: UserModel.find() ,
     date: new Date('2016-09-29'),
     length: 107,
     director: 'Peter Berg',

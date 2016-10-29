@@ -2754,4 +2754,9 @@ node_modules/supertest/test/fixtures/test_cert.pem
 node_modules/supertest/test/fixtures/test_key.pem
 node_modules/supertest/test/supertest.js
 out/artifacts/untitled_war_exploded/WEB-INF/web.xml
-web-module/web/index.html
+node_modules/.bin/
+node_modules/jsonwebtoken/
+node_modules/mocha/
+node_modules/mongoose-unique-validator/
+node_modules/mongoose/
+node_modules/supertest/

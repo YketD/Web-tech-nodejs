@@ -3,11 +3,11 @@
  */
 var User = require('./UserModel.js');
 var post = new User({
-    achternaam: 'Donkelaar',
-    tussenVoegsels: 'ten',
-    voornaam: 'yke',
     username: 'admin',
-    password: 'admin'
+    password: 'admin',
+    firstname: 'yke',
+    middlename: 'ten',
+    lastname: 'Donkelaar'
 });
 post.save(function (err, result) {
     if (err)

@@ -1,124 +1,69 @@
-/**
- * Created by yketd on 27-9-2016.
- */
+/* Libraries */
 var mongoose = require('mongoose');
 var express = require('express');
+var path = require('path');
+var bodyParser = require('body-parser');
+
+/* Data model */
 var movieModel = require('./api/moviemodel.js');
 var ratingModel = require('./api/RatingModel.js');
-var user = require('./api/UserModel');
-var path = require('path')
+var User = require('./api/UserModel');
 
-
-var headersSent = false;
+/* Web server */
 var app = express();
-
-app.set('private-key', 'wachtwoord');
 var jwt = require('jsonwebtoken');
 
+/* Private key */
+app.set('private-key', 'wachtwoord');
 
-mongoose.connect('mongodb://localhost/notflix');
-
-
-var bodyParser = require('body-parser');
+/* Body parser */
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
+app.use(bodyParser.urlencoded({extended: true}));
+
+/* Static files directory */
 app.use(express.static("public"));
 
+/* MongoDB connection */
+mongoose.connect('mongodb://localhost/notflix');
 
-app.get('/api/token', function (req, res) {
-    res.send(jwt.sign(testUser,
-        app.get('private-key'),
-        {expiresIn: '1440m'}));
+/* API calls */
+app.post('/api/register', function(req, res) {
+
+    // Validation
+    if (req.body.username === undefined)
+        res.status(400).send();
+    else if (req.body.password === undefined || req.body.password2 === undefined)
+        res.status(400).send();
+    else if (req.body.password != req.body.password2)
+        res.status(200).send({error: "Password validation did not match"});
+    else if (req.body.firstname === undefined || req.body.lastname === undefined)
+        res.status(400).send();
+
+    // Validation passed
+    else
+    {
+        // Save user in database
+        /*var newUser = new User({
+            username: req.body.username,
+            password: req.body.password,
+            lastname: req.body.lastname,
+            middlename: req.body.middlename,
+            firstname: req.body.firstname
+        });*/
+
+        // Create a token
+        res.status(400).send({
+            token: jwt.sign(result, app.get("private-key"), {expiresIn: "1440m"})
+        });
+    }
 });
-
-app.get('/api/Movie', function (req, res) {
-    var token = req.headers['authorization'];
-    jwt.verify(token, app.get('private-key'), function (err, decoded) {
-        if (err) {
-            res.send('invalid key, authorization failed!');
-        } else {
-            // var currentuser;
-            // var userquery = {};
-            // userquery['username'] = token.username;
-            // ratingModel.findOne(
-            //     userquery,
-            //     {rating: 1},
-            //     function (err, results) {
-            //         if (err) res.status(401).send('user not found! contact an administrator')
-            //         currentuser = results;
-            //     }
-            // )
-            var moviequery = {};
-            if (req.query.title != undefined)
-                moviequery['title'] = req.query.title;
-            if (req.query.imdb != undefined)
-                moviequery['imdb'] = req.query.imdb;
-            if (req.query.date != undefined)
-                moviequery['date'] = req.query.date;
-            if (req.query.length != undefined)
-                moviequery['length'] = req.query.length;
-            if (req.query.director != undefined)
-                moviequery['director'] = req.query.director;
-            if (req.query.description != undefined)
-                moviequery['description'] = req.query.description;
-            movieModel.findOne(
-                moviequery
-                , {title: 1, description: 1, averagerating: 1},
-                function (err, results1) {
-                    if (err) res.status(400).send({message: err});
-                    else res.status(200).send({results: results1});
-                }
-            );
-
-
-        }
-    })
-});
-
-app.get('/api/users', function (req, res) {
-    user.find(
-        function (err, result1) {
-            if (err) res.status(401).send({error: err})
-            else res.status(200).send({result: result1})
-        }
-    )
-})
-
-app.post('/api/register', function (req, res) {
-
-    var user1 = new user({
-        'achternaam' : req.body.achternaam,
-        'voornaam': req.body.voornaam,
-        'username': req.body.username,
-        'password': req.body.password
-    });
-
-    if (req.body.tussenvoegsel != 'undefined')
-        user1['tussenvoegsel'] = req.body.tussenvoegsel;
-
-    user.ensureIndex
-    user1.save(function (err, result) {
-        if (err)
-            res.status(401).send({error: err});
-        else {
-
-            var token = jwt.sign(user1,
-                app.get('private-key'),
-                {expiresIn: '1440m'});
-            res.status(201).send({
-                message: 'registration valid, login with:', result: result,
-                key: token})
-            }
-        })
-    });
 
 app.post('/api/login', function (req, res) {
+
     var loginQuery = {}
     loginQuery['password'] = req.body.password;
     loginQuery['username'] = req.body.username;
-    user.findOne(loginQuery, {}, function (err, result) {
+    User.findOne(loginQuery, {}, function (err, result) {
         if (err) {
             console.log(err)
         } else {
@@ -129,7 +74,6 @@ app.post('/api/login', function (req, res) {
                             app.get('private-key'),
                             {expiresIn: '1440m'})
                     });
-                    // headersSent = true;
                 }
             } else
                 res.status(400).send();
@@ -137,50 +81,8 @@ app.post('/api/login', function (req, res) {
     });
 });
 
-app.post('/api/rating', function (req, res) {
-    var token = req.headers['authorization'];
-    jwt.verify(token, app.get('private-key'), function (err, decoded) {
-        if (err) {
-            res.send('invalid key, authorization failed!');
-        } else {
-            var rating = new ratingModel({
-                rating: req.body.rating,
-                gebruiker: this,
-                movie: req.body.movie,
-                datum: Date.now()
-            });
-            rating.save(function (err, result) {
-                if (err) {
-                    res.status(401).send({error: err})
-                }
-                else {
-                    console.log('ratingmodel', "rating has been saved succesfully, result + " + result);
-                    res.sendStatus(201)
-                }
-            });
-        }
-    })
-});
-
-app.get('/api/oneMovietest', function (req, res) {
-    testQuery = {};
-    testQuery['title'] = req.body.title;
-    testQuery['imdb'] = req.body.imdb;
-    movieModel.findOne(
-        testQuery,
-        {title: 1},
-        function (err, result) {
-            if (err) res.send('Error! : ' + err);
-            res.send(result.title + typeof result)
-        }
-    )
-})
-
-app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname + '/web-module/web/index.html'))
-})
-
 app.get('/api/rating', function (req, res) {
+
     var token = req.headers['authorization'];
     jwt.verify(token, app.get('private-key'), function (err, decoded) {
         if (err) {
@@ -197,10 +99,33 @@ app.get('/api/rating', function (req, res) {
     })
 });
 
-app.get('/login', function (req, res) {
-    res.sendFile(path.join(__dirname + '/web-module/web/login.html'))
-})
+app.post('/api/rating', function (req, res) {
 
-app.listen(3000, function () {
+    var token = req.headers['authorization'];
+    jwt.verify(token, app.get('private-key'), function (err, decoded) {
+        if (err) {
+            res.send('invalid key, authorization failed!');
+        } else {
+            var rating = new ratingModel({
+                rating: req.body.rating,
+                user: this,
+                movie: req.body.movie,
+                date: Date.now()
+            });
+            rating.save(function (err, result) {
+                if (err) {
+                    res.status(401).send({error: err})
+                }
+                else {
+                    console.log('ratingmodel', "rating has been saved succesfully, result + " + result);
+                    res.sendStatus(201)
+                }
+            });
+        }
+    })
+});
+
+/* Start app */
+app.listen(3000, function() {
     console.log('example app listening');
 });

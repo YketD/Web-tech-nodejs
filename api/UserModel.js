@@ -8,11 +8,11 @@ var uniqueValidator = require('mongoose-unique-validator');
 
 
 var userSchema = new schema({
-    achternaam: {type: String, required: true},
-    tussenvoegsel: {type: String, required: false},
-    voornaam: {type: String, required: true},
     username: {type: String, unique: true, required: true},
-    password: {type: String, required: true}
+    password: {type: String, required: true},
+    firstname: {type: String, required: true},
+    middlename: {type: String, required: false},
+    lastname: {type: String, required: true}
 });
 userSchema.plugin(uniqueValidator);
 

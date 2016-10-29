@@ -6,9 +6,9 @@ var schema = mongoose.Schema;
 
 var ratingSchema = new schema({
     rating: {type: Number, required: true},
-    gebruiker: {type: Object, required: true},
+    user: {type: Object, required: true},
     movie: {type: String, required: true},
-    datum: {type: Date, required: true}
+    date: {type: Date, required: true}
 });
 
 module.exports = mongoose.model('RatingModel.js', ratingSchema);
