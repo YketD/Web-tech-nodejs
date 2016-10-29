@@ -42,49 +42,93 @@ app.post('/api/register', function(req, res) {
     // Validation passed
     else
     {
-        // Save user in database
-        /*var newUser = new User({
+        // Create a new user
+        var newUser = new User({
             username: req.body.username,
             password: req.body.password,
             lastname: req.body.lastname,
             middlename: req.body.middlename,
             firstname: req.body.firstname
-        });*/
+        });
 
-        // Create a token
-        res.status(400).send({
-            token: jwt.sign(result, app.get("private-key"), {expiresIn: "1440m"})
+        // No duplicate users
+        User.findOne({username: newUser.username, password: newUser.password}, {}, function(err, result) {
+
+            // 400 on failure
+            if (err)
+            {
+                console.log(err)
+                res.status(400).send();
+            }
+            else
+            {
+                if (result == null)
+                {
+                    // Save user in database
+                    newUser.save(function(err, result) {
+
+                        // 400 on failure
+                        if (err)
+                        {
+                            console.error(err);
+                            res.status(400).send();
+                        }
+                        else
+                        {
+                            // Create a token
+                            res.status(200).send({
+                                token: jwt.sign(newUser, app.get("private-key"), {expiresIn: "1440m"})
+                            });
+                        }
+                    });
+                }
+
+                else
+                {
+                    // user found
+                    res.status(200).send({error: "Gebruikersnaam al in gebruik"});
+                }
+            }
         });
     }
 });
 
-app.post('/api/login', function (req, res) {
+app.post('/api/login', function(req, res) {
 
     var loginQuery = {}
     loginQuery['password'] = req.body.password;
     loginQuery['username'] = req.body.username;
     User.findOne(loginQuery, {}, function (err, result) {
-        if (err) {
+
+        // 400 on failure
+        if (err)
+        {
             console.log(err)
-        } else {
-            if (result != null) {
-                if (result.username == loginQuery.username && result.password == loginQuery.password) {
+            res.status(400).send();
+        }
+        else
+        {
+            if (result != null)
+            {
+                if (result.username == loginQuery.username && result.password == loginQuery.password)
+                {
+                    // Login OK, create a token
                     res.status(200).send({
-                        token: jwt.sign(result,
-                            app.get('private-key'),
-                            {expiresIn: '1440m'})
+                        token: jwt.sign(result, app.get('private-key'), {expiresIn: '1440m'})
                     });
                 }
-            } else
-                res.status(400).send();
+            }
+
+            // Invalid login, 401
+            else res.status(401).send();
         }
     });
 });
 
-app.get('/api/rating', function (req, res) {
+app.get('/api/rating', function(req, res) {
 
     var token = req.headers['authorization'];
-    jwt.verify(token, app.get('private-key'), function (err, decoded) {
+    jwt.verify(token, app.get('private-key'), function(err, decoded) {
         if (err) {
             res.send(401, 'invalid key, authorization failed!');
         } else {
@@ -99,7 +143,7 @@ app.get('/api/rating', function (req, res) {
     })
 });
 
-app.post('/api/rating', function (req, res) {
+app.post('/api/rating', function(req, res) {
 
     var token = req.headers['authorization'];
     jwt.verify(token, app.get('private-key'), function (err, decoded) {

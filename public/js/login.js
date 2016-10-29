@@ -1,7 +1,7 @@
 // Form validation
 // -----------------------------------------------------
 $.validate({
-    modules : "security",
+    modules: "security",
     lang: "nl"
 });
 
@@ -22,12 +22,12 @@ $("#login_form").submit(function (e) {
         success: function (data)
         {
             alert("Hello world");
-            //localStorage.setItem("token", data.token);
-            //window.location.href = "/index.html";
+            localStorage.setItem("token", data.token);
+            window.location.href = "/movies.html";
         },
         error: function()
         {
-            alert("Login mislukt! Probeer het later opnieuw");
+            alert("Login mislukt! Probeer het opnieuw");
         }
     })
 });
@@ -52,9 +52,15 @@ $("#register_form").submit(function (e) {
         },
         success: function (data)
         {
-            alert("Hello world");
-            //localStorage.setItem("token", data.token);
-            //window.location.href = "/index.html";
+            if (data.error === undefined)
+            {
+                localStorage.setItem("token", data.token);
+                window.location.href = "/index.html";
+            }
+            else
+            {
+                alert(data.error);
+            }
         },
         error: function()
         {
