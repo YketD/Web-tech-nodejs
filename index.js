@@ -173,7 +173,19 @@ app.post("/api/rating", function(req, res) {
             // Do not allow voting on the same movie multiple times
             ratingModel.findOne({ user: decoded._doc._id, imdb: req.body.imdb }, {}, function(err, result) {
                 if (err) return res.status(400).send({ error: err });
-                else if (result != null) return res.status(200).send({ error: "Je hebt deze film al gewaardeerd" });
+                else if (result != null)
+                {
+                    // Update existing vote
+                    //return res.status(200).send({ error: "Je hebt deze film al gewaardeerd" });
+                    ratingModel.update(
+                        { user: decoded._doc._id, imdb: req.body.imdb },
+                        { $set: { rating: parseFloat(req.body.rating) } },
+                        function (err, result) {
+                            if (err) return res.status(400).send({ error: err });
+                            else return res.status(200).send();
+                        }
+                    );
+                }
                 else
                 {
                     // Save rating
