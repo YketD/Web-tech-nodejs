@@ -13,21 +13,23 @@ function loadPosterImage(image, imdb)
     });
 }
 
-function getAverageRating(authToken, rateObj, imdb)
+function getAverageRating(authToken, rateObj, userRateObj, imdb, isUserRating)
 {
     $.ajax({
         type: "GET",
         url: "/api/rating",
         cache: true,
         headers: { "Authorization": authToken },
-        data: { imdb: imdb },
+        data: { imdb: imdb, user: isUserRating },
         success: function(data)
         {
             if (data == null || data.result === undefined) alert("Error processing movie data");
+            else if (isUserRating) userRateObj.rating("rate", parseFloat(data.result[0].rating));
             else rateObj.rating("rate", parseFloat(data.result[0].avg));
         },
         error: function() {
-            rateObj.rating("rate", 0.0);
+            if (isUserRating) userRateObj.rating("rate", 0.0);
+            else rateObj.rating("rate", 0.0);
         }
     });
 }

@@ -129,6 +129,14 @@ app.get("/api/rating", function(req, res) {
             // Validation
             if (req.query.imdb === undefined)
                 return res.status(400).send();
+            else if (req.query.user !== undefined && req.query.user != 0)
+            {
+                ratingModel.find({ user: decoded._doc._id, imdb: req.query.imdb }, function (err, result) {
+                        if (err) return res.status(400).send({ error: err });
+                        else return res.status(200).send({ result: result });
+                    }
+                );
+            }
             else
             {
                 // Get average rating of movie
@@ -136,8 +144,12 @@ app.get("/api/rating", function(req, res) {
                     { $group: { _id: "$imdb", avg: { $avg: "$rating" } } },
                     { $match: { _id: req.query.imdb } }
                 ], function(err, result) {
-                    if (err) return res.status(400).send({error: err});
-                    else return res.status(200).send({result: result});
+                    if (err)
+                        return res.status(400).send({error: err});
+                    else if (result == null || result.length < 1)
+                        return res.status(200).send({result: [{_id: req.query.imdb, avg: 0.0}]});
+                    else
+                        return res.status(200).send({result: result});
                 });
             }
         }
@@ -162,19 +174,50 @@ app.post("/api/rating", function(req, res) {
             ratingModel.findOne({ user: decoded._doc._id, imdb: req.body.imdb }, {}, function(err, result) {
                 if (err) return res.status(400).send({ error: err });
                 else if (result != null) return res.status(200).send({ error: "Je hebt deze film al gewaardeerd" });
-            });
+                else
+                {
+                    // Save rating
+                    var newRating = new ratingModel({
+                        rating: parseFloat(req.body.rating),
+                        user: decoded._doc._id,
+                        imdb: req.body.imdb,
+                        date: Date.now()
+                    });
 
-            // Save rating
-            var newRating = new ratingModel({
-                rating: parseFloat(req.body.rating),
-                user: decoded._doc._id,
-                imdb: req.body.imdb,
-                date: Date.now()
+                    newRating.save(function (err, result) {
+                        if (err) return res.status(400).send({ error: err });
+                        else return res.status(200).send();
+                    });
+                }
             });
+        }
+    });
+});
 
-            newRating.save(function (err, result) {
+app.delete("/api/rating", function(req, res) {
+
+    var token = req.headers["authorization"];
+    jwt.verify(token, app.get("private-key"), function(err, decoded) {
+
+        if (err) return res.status(401).send({ error: err });
+        else
+        {
+            // Validation
+            if (req.body.imdb === undefined)
+                return res.status(400).send();
+
+            // Do not allow voting on the same movie multiple times
+            ratingModel.findOne({ user: decoded._doc._id, imdb: req.body.imdb }, {}, function(err, result) {
                 if (err) return res.status(400).send({ error: err });
-                else return res.status(200).send();
+                else if (result == null) return res.status(200).send({ error: "Je hebt deze film nog niet gewaardeerd" });
+                else
+                {
+                    // Delete rating
+                    ratingModel.remove({user: decoded._doc._id, imdb: req.body.imdb}, function (err, result) {
+                        if (err) return res.status(400).send({ error: err });
+                        else return res.status(200).send();
+                    });
+                }
             });
         }
     });

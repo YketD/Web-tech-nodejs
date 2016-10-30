@@ -87,7 +87,7 @@ movieRatingUser.on("change", function() {
         data: { imdb: urlVars.imdb, rating: $(this).val() },
         success: function(data) {
             if (data.error === undefined)
-                getAverageRating(authToken, movieRatingAverage, movieIMDB);
+                getAverageRating(authToken, movieRatingAverage, movieRatingUser, movieIMDB, 0);
             else
                 alert(data.error);
         }
@@ -104,7 +104,12 @@ $("#removeRating").on("click", function() {
         headers: { "Authorization": authToken },
         data: { imdb: urlVars.imdb },
         success: function(data) {
-            movieRatingUser.rating("rate", 0.0);
+            if (data.error === undefined)
+            {
+                getAverageRating(authToken, movieRatingAverage, movieRatingUser, movieIMDB, 0);
+                movieRatingUser.rating("rate", 0.0);
+            }
+            else alert(data.error);
         }
     });
 });
@@ -136,7 +141,8 @@ $(document).ready(function() {
 
                 // Load image in an ajax request
                 loadPosterImage(moviePoster, movie.imdb);
-                getAverageRating(authToken, movieRatingAverage, movie.imdb);
+                getAverageRating(authToken, movieRatingAverage, movieRatingUser, movie.imdb, 0);
+                getAverageRating(authToken, movieRatingAverage, movieRatingUser, movie.imdb, 1);
                 movieIMDB = movie.imdb;
             }
         },
