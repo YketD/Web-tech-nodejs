@@ -1,7 +1,3 @@
-// Get auth token
-// -----------------------------------------------------
-var authToken = localStorage.getItem("token");
-
 // Store these often used DOM elements for efficiency
 // -----------------------------------------------------
 var movieTitle = $("#movieTitle");
@@ -16,9 +12,39 @@ $("#backButton").on("click", function() {
     window.location.href = "/index.html";
 });
 
+// Logout button
+// -----------------------------------------------------
+$(".logoutButton").on("click", function() {
+    localStorage.removeItem("token");
+    window.location.href = "/movies.html";
+});
+
 // Let's load the movies when page is loaded
 // -----------------------------------------------------
 $(document).ready(function() {
+
+    // Get auth token
+    var authToken = localStorage.getItem("token");
+
+    // If logged in, get username and show welcome message
+    if (authToken != null)
+    {
+        $.ajax({
+            type: "GET",
+            url: "/api/users",
+            cache: false,
+            headers: { "Authorization": authToken },
+            data: { user: 1 },
+            success: function(data) {
+                if (data.result !== undefined && data.result.length > 0)
+                {
+                    $("#welcome_username").html(data.result[0].firstname);
+                    $(".loggedinNotification").fadeIn(500);
+                    $(".logoutButton").show();
+                }
+            }
+        });
+    }
 
     $.ajax({
         type: "GET",

@@ -250,6 +250,43 @@ app.get("/api/movies", function(req, res) {
     ).limit(req.query.limit !== undefined ? parseInt(req.query.limit) : 0);
 });
 
+app.get("/api/users", function(req, res) {
+
+    var token = req.headers["authorization"];
+    jwt.verify(token, app.get("private-key"), function(err, decoded) {
+
+        if (err) return res.status(401).send({ error: err });
+        else
+        {
+            // Show only data of the logged in user
+            if (req.query.user !== undefined && req.query.user != 0)
+            {
+                if (err) return res.status(401).send({ error: err });
+                else
+                {
+                    userModel.find(
+                        { _id: decoded._doc._id },
+                        { "_id": 0, "password": 0, "__v": 0 },
+                        function (err, result) {
+                            if (err) return res.status(400).send({error: err});
+                            else return res.status(200).send({result: result});
+                        }
+                    );
+                }
+            }
+            else
+            {
+                // Show a list of users
+                userModel.find({}, { "_id": 0, "password": 0, "__v": 0 }, function (err, result) {
+                        if (err) return res.status(400).send({ error: err });
+                        else return res.status(200).send({ result: result });
+                    }
+                );
+            }
+        }
+    });
+});
+
 /* Start app */
 app.listen(3000, function() {
     console.log("NotFlix app listening");

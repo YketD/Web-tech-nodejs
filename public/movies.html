@@ -15,9 +15,18 @@
     <div class="page-header">
         <h1>Not Flix</h1>
         <button type="button" id="backButton" class="btn btn-primary">Terug naar homepagina</button>
+        <button type="button" class="logoutButton btn btn-danger">Uitloggen</button>
     </div>
 
-    <div id="movies" class="container-fluid"></div>
+    <div class="loggedinNotification alert alert-info alert-dismissible fade in" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+        <strong>Welkom terug, <span id="welcome_username">Gast</strong>!
+        Neem een kijkje in ons uitgebreide assortiment aan films.
+    </div>
+
+    <div id="movies"></div>
 </div>
 
 <div class="modal fade" id="movieDetails" tabindex="-1" role="dialog" aria-labelledby="movieLabel">
