@@ -19,6 +19,6 @@
     padding-top: 20px;
 }
 
-.loggedinNotification, .logoutButton, .loginNotification {
+.loggedinNotification, .userlistButton, .logoutButton, .loginNotification {
     display: none;
 }

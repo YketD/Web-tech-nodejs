@@ -7,19 +7,29 @@
 
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 
-    <title>Welkom</title>
+    <title>Gebruikerslijst</title>
 </head>
 <body>
 <div class="container">
     <div class="page-header">
         <h1>Not Flix</h1>
+        <button type="button" id="backButton" class="btn btn-primary">Terug naar overzicht</button>
     </div>
 
-    <a href="movies.html" class="button">Bekijk alle films</a><br />
-    <a href="login.html" class="button">Login/registratie</a>
+    <table id="users" class="table table-hover">
+        <thead>
+        <tr>
+            <th>Gebruikersnaam</th>
+            <th>Voornaam</th>
+            <th>Tvg.</th>
+            <th>Achternaam</th>
+        </tr>
+        </thead>
+    </table>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="/js/users.js"></script>
 </body>
 </html>

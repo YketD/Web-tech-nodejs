@@ -12,6 +12,12 @@ $("#backButton").on("click", function() {
     window.location.href = "/index.html";
 });
 
+// Userlijst button
+// -----------------------------------------------------
+$(".userlistButton").on("click", function() {
+    window.location.href = "/users.html";
+});
+
 // Logout button
 // -----------------------------------------------------
 $(".logoutButton").on("click", function() {
@@ -40,7 +46,7 @@ $(document).ready(function() {
                 {
                     $("#welcome_username").html(data.result[0].firstname);
                     $(".loggedinNotification").fadeIn(500);
-                    $(".logoutButton").show();
+                    $(".userlistButton, .logoutButton").show();
                 }
             }
         });
