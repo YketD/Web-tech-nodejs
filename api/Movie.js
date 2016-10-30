@@ -14,13 +14,13 @@ new Movie({
 }).save();
 
 new Movie({
-    title: 'Daredevil',
-    imdb: 'tt3322312',
-    date: new Date('2015-04-10'),
-    length: 54,
-    director: 'Drew Goddard',
-    description: 'Matt Murdock, with his other senses superhumanly enhanced, ' +
-                 'fights crime as a blind lawyer by day, and vigilante by night.'
+    title: 'Game of Thrones',
+    imdb: 'tt0944947',
+    date: new Date('2011-04-17'),
+    length: 56,
+    director: 'David Benioff',
+    description: 'While a civil war brews between several noble families in Westeros, ' +
+                 'the children of the former rulers of the land attempt to rise to power.'
 }).save();
 
 new Movie({

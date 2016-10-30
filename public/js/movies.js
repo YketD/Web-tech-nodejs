@@ -12,7 +12,7 @@ $("#backButton").on("click", function() {
     window.location.href = "/index.html";
 });
 
-// Userlijst button
+// Userlist button
 // -----------------------------------------------------
 $(".userlistButton").on("click", function() {
     window.location.href = "/users.html";
