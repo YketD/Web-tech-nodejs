@@ -35,6 +35,7 @@ var movieDirector = $("#movieDirector");
 var moviePoster = $("#moviePoster");
 var movieRatingAverage = $("#movieRatingAverage");
 var movieRatingUser = $("#movieRatingUser");
+var removeRating = $("#removeRating");
 
 // Back button
 // -----------------------------------------------------
@@ -101,7 +102,7 @@ movieRatingUser.on("change", function() {
 
 // Removing rating
 // -----------------------------------------------------
-$("#removeRating").on("click", function() {
+removeRating.on("click", function() {
    // Remove rating
     $.ajax({
         type: "DELETE",
@@ -123,6 +124,14 @@ $("#removeRating").on("click", function() {
 // Let's load the movie data when page is loaded
 // -----------------------------------------------------
 $(document).ready(function() {
+
+    // Disable voting elements if not logged in
+    if (authToken == null)
+    {
+        movieRatingUser.prop("disabled", "disabled");
+        removeRating.prop("disabled", "disabled");
+        $(".loginNotification").fadeIn(2000);
+    }
 
     $.ajax({
         type: "GET",
