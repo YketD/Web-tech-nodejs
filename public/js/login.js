@@ -19,7 +19,7 @@ $("#login_form").submit(function (e) {
             username: $("#login_username").val(),
             password: $("#login_password").val()
         },
-        success: function (data)
+        success: function(data)
         {
             alert("Hello world");
             localStorage.setItem("token", data.token);
@@ -29,7 +29,7 @@ $("#login_form").submit(function (e) {
         {
             alert("Login mislukt! Probeer het opnieuw");
         }
-    })
+    });
 });
 
 // Register form
@@ -50,7 +50,7 @@ $("#register_form").submit(function (e) {
             middlename: $("#register_middlename").val(),
             lastname: $("#register_lastname").val()
         },
-        success: function (data)
+        success: function(data)
         {
             if (data.error === undefined)
             {
