@@ -77,8 +77,8 @@ movieRatingUser.rating({
     }
 });
 
+// Cast vote
 movieRatingUser.on("change", function() {
-    // Cast vote
     $.ajax({
         type: "POST",
         url: "/api/rating",
@@ -86,7 +86,10 @@ movieRatingUser.on("change", function() {
         headers: { "Authorization": authToken },
         data: { imdb: urlVars.imdb, rating: $(this).val() },
         success: function(data) {
-            getAverageRating(authToken, movieRatingAverage, movieIMDB);
+            if (data.error === undefined)
+                getAverageRating(authToken, movieRatingAverage, movieIMDB);
+            else
+                alert(data.error);
         }
     });
 });

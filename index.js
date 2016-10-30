@@ -36,13 +36,13 @@ app.post("/api/register", function(req, res) {
 
     // Validation
     if (req.body.username === undefined)
-        res.status(400).send();
+        return res.status(400).send();
     else if (req.body.password === undefined || req.body.password2 === undefined)
-        res.status(400).send();
+        return res.status(400).send();
     else if (req.body.password != req.body.password2)
-        res.status(200).send({error: "Password validation did not match"});
+        return res.status(200).send({error: "Password validation did not match"});
     else if (req.body.firstname === undefined || req.body.lastname === undefined)
-        res.status(400).send();
+        return res.status(400).send();
 
     // Validation passed
     else
@@ -60,7 +60,7 @@ app.post("/api/register", function(req, res) {
         userModel.findOne({username: newUser.username, password: newUser.password}, {}, function(err, result) {
 
             // 400 on failure
-            if (err) res.status(400).send({ error: err });
+            if (err) return res.status(400).send({ error: err });
             else
             {
                 if (result == null)
@@ -69,11 +69,11 @@ app.post("/api/register", function(req, res) {
                     newUser.save(function(err, result) {
 
                         // 400 on failure
-                        if (err) res.status(400).send({ error: err });
+                        if (err) return res.status(400).send({ error: err });
                         else
                         {
                             // Create a token
-                            res.status(200).send({
+                            return res.status(200).send({
                                 token: jwt.sign(newUser, app.get("private-key"), {expiresIn: "1440m"})
                             });
                         }
@@ -83,7 +83,7 @@ app.post("/api/register", function(req, res) {
                 else
                 {
                     // user found
-                    res.status(200).send({error: "Gebruikersnaam al in gebruik"});
+                    return res.status(200).send({error: "Gebruikersnaam al in gebruik"});
                 }
             }
         });
@@ -98,7 +98,7 @@ app.post("/api/login", function(req, res) {
     userModel.findOne(loginQuery, {}, function(err, result) {
 
         // 400 on failure
-        if (err) res.status(400).send({ error: err });
+        if (err) return res.status(400).send({ error: err });
         else
         {
             if (result != null)
@@ -106,14 +106,14 @@ app.post("/api/login", function(req, res) {
                 if (result.username == loginQuery.username && result.password == loginQuery.password)
                 {
                     // Login OK, create a token
-                    res.status(200).send({
+                    return res.status(200).send({
                         token: jwt.sign(result, app.get("private-key"), {expiresIn: "1440m"})
                     });
                 }
             }
 
             // Invalid login, 401
-            else res.status(401).send();
+            else return res.status(401).send();
         }
     });
 });
@@ -123,12 +123,12 @@ app.get("/api/rating", function(req, res) {
     var token = req.headers["authorization"];
     jwt.verify(token, app.get("private-key"), function(err, decoded) {
 
-        if (err) res.status(401).send({ error: err });
+        if (err) return res.status(401).send({ error: err });
         else
         {
             // Validation
             if (req.query.imdb === undefined)
-                res.status(400).send();
+                return res.status(400).send();
             else
             {
                 // Get average rating of movie
@@ -136,8 +136,8 @@ app.get("/api/rating", function(req, res) {
                     { $group: { _id: "$imdb", avg: { $avg: "$rating" } } },
                     { $match: { _id: req.query.imdb } }
                 ], function(err, result) {
-                    if (err) res.status(400).send({error: err});
-                    else res.status(200).send({result: result});
+                    if (err) return res.status(400).send({error: err});
+                    else return res.status(200).send({result: result});
                 });
             }
         }
@@ -149,14 +149,20 @@ app.post("/api/rating", function(req, res) {
     var token = req.headers["authorization"];
     jwt.verify(token, app.get("private-key"), function(err, decoded) {
 
-        if (err) res.status(401).send({ error: err });
+        if (err) return res.status(401).send({ error: err });
         else
         {
             // Validation
             if (req.body.imdb === undefined)
-                res.status(400).send();
+                return res.status(400).send();
             else if (req.body.rating === undefined)
-                res.status(400).send();
+                return res.status(400).send();
+
+            // Do not allow voting on the same movie multiple times
+            ratingModel.findOne({ user: decoded._doc._id, imdb: req.body.imdb }, {}, function(err, result) {
+                if (err) return res.status(400).send({ error: err });
+                else if (result != null) return res.status(200).send({ error: "Je hebt deze film al gewaardeerd" });
+            });
 
             // Save rating
             var newRating = new ratingModel({
@@ -167,8 +173,8 @@ app.post("/api/rating", function(req, res) {
             });
 
             newRating.save(function (err, result) {
-                if (err) res.status(400).send({ error: err });
-                else res.status(200).send();
+                if (err) return res.status(400).send({ error: err });
+                else return res.status(200).send();
             });
         }
     });
@@ -179,7 +185,7 @@ app.get("/api/movies", function(req, res) {
     var token = req.headers["authorization"];
     jwt.verify(token, app.get("private-key"), function(err, decoded) {
 
-        if (err) res.status(401).send({ error: err });
+        if (err) return res.status(401).send({ error: err });
         else
         {
             // Set up filter
@@ -189,8 +195,8 @@ app.get("/api/movies", function(req, res) {
 
             // Get results from database
             movieModel.find(filter, function (err, result) {
-                    if (err) res.status(400).send({ error: err });
-                    else res.status(200).send({ result: result });
+                    if (err) return res.status(400).send({ error: err });
+                    else return res.status(200).send({ result: result });
                 }
             ).limit(req.query.limit !== undefined ? parseInt(req.query.limit) : 0);
         }

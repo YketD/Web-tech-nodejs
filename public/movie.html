@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-rating/1.4.0/bootstrap-rating.min.css" />
 
-    <title>Film</title>
+    <title>Bekijk een film</title>
 </head>
 <body>
 <div class="container">
@@ -28,13 +28,13 @@
                 <div class="row">
                     <div class="col-md-6">
                         <dl class="dl-horizontal">
-                            <dt>Release date</dt>
+                            <dt>Uitgebracht op</dt>
                             <dd id="movieDate">...</dd>
-                            <dt>Runtime</dt>
+                            <dt>Speelduur</dt>
                             <dd id="movieDuration">...</dd>
-                            <dt>Director/Writer</dt>
+                            <dt>Regisseur</dt>
                             <dd id="movieDirector">...</dd>
-                            <dt>Average user rating</dt>
+                            <dt>Gem. beoordeling</dt>
                             <dd>
                                 <input type="hidden" id="movieRatingAverage" value="0" data-fractions="2" data-readonly />
                             </dd>
@@ -42,12 +42,12 @@
                     </div>
                     <div class="col-md-6">
                         <dl class="dl-horizontal">
-                            <dt>Your rating</dt>
+                            <dt>Jouw beoordeling</dt>
                             <dd>
                                 <input type="hidden" id="movieRatingUser" value="0" data-fractions="2" />
                             </dd>
                             <dd>
-                                <button type="button" id="removeRating" class="btn btn-default btn-xs">Remove</button>
+                                <button type="button" id="removeRating" class="btn btn-default btn-xs">Verwijder</button>
                             </dd>
                         </dl>
                     </div>
@@ -55,7 +55,7 @@
 
                 <div class="row">
                     <div class="col-md-12">
-                        <button type="button" id="backButton" class="btn btn-primary">Back to overview</button>
+                        <button type="button" id="backButton" class="btn btn-primary">Terug naar overzicht</button>
                     </div>
                 </div>
             </div>

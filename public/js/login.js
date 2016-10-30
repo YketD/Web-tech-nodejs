@@ -21,7 +21,6 @@ $("#login_form").submit(function (e) {
         },
         success: function(data)
         {
-            alert("Hello world");
             localStorage.setItem("token", data.token);
             window.location.href = "/movies.html";
         },
@@ -57,10 +56,7 @@ $("#register_form").submit(function (e) {
                 localStorage.setItem("token", data.token);
                 window.location.href = "/index.html";
             }
-            else
-            {
-                alert(data.error);
-            }
+            else alert(data.error);
         },
         error: function()
         {
