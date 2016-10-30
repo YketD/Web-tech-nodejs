@@ -5,6 +5,12 @@ $.validate({
     lang: "nl"
 });
 
+// Back button
+// -----------------------------------------------------
+$("#backButton").on("click", function() {
+    window.location.href = "/index.html";
+});
+
 // Login form
 // -----------------------------------------------------
 $("#login_form").submit(function (e) {

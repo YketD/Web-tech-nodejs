@@ -1,18 +1,23 @@
+// Get auth token
+// -----------------------------------------------------
 var authToken = localStorage.getItem("token");
 
-/* Redirect if not logged in */
-if (authToken == null)
-{
-    window.location.href = "/login.html";
-}
-
+// Store these often used DOM elements for efficiency
+// -----------------------------------------------------
 var movieTitle = $("#movieTitle");
 var movieDesc = $("#movieDesc");
 var moviePoster = $("#moviePoster");
 var movieView = $("#movieView");
 var movieDetails = $("#movieDetails");
 
-/* Let's load the movies when page is loaded */
+// Back button
+// -----------------------------------------------------
+$("#backButton").on("click", function() {
+    window.location.href = "/index.html";
+});
+
+// Let's load the movies when page is loaded
+// -----------------------------------------------------
 $(document).ready(function() {
 
     $.ajax({
@@ -54,14 +59,12 @@ $(document).ready(function() {
                     loadPosterImage(movie.posterImage, movie.imdb);
                 });
             }
-        },
-        error: function()
-        {
-            window.location.href = "/login.html";
         }
     });
 });
 
+// Function to show movie modal
+// -----------------------------------------------------
 function showMovieDetails(movie)
 {
     movieTitle.html(movie.title);

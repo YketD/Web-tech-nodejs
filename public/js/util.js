@@ -1,4 +1,5 @@
-/* Function to load movie posters from omdb API */
+// Function to load movie posters from omdb API
+// -----------------------------------------------------
 function loadPosterImage(image, imdb)
 {
     $.ajax({
@@ -13,6 +14,8 @@ function loadPosterImage(image, imdb)
     });
 }
 
+// Function to load an average movie or user rating
+// -----------------------------------------------------
 function getAverageRating(authToken, rateObj, userRateObj, imdb, isUserRating)
 {
     $.ajax({

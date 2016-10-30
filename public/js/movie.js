@@ -1,10 +1,6 @@
+// Get auth token
+// -----------------------------------------------------
 var authToken = localStorage.getItem("token");
-
-/* Redirect if not logged in */
-if (authToken == null)
-{
-    window.location.href = "/login.html";
-}
 
 // http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url
 function getUrlVars()
@@ -20,12 +16,16 @@ function getUrlVars()
     return vars;
 }
 
+// Get IMDB from query string
+// -----------------------------------------------------
 var urlVars = getUrlVars();
 if (urlVars.imdb === undefined)
 {
     window.location.href = "/login.html";
 }
 
+// Store these often used DOM elements for efficiency
+// -----------------------------------------------------
 var movieIMDB = "";
 var movieTitle = $("#movieTitle");
 var movieDesc = $("#movieDesc");
@@ -36,11 +36,14 @@ var moviePoster = $("#moviePoster");
 var movieRatingAverage = $("#movieRatingAverage");
 var movieRatingUser = $("#movieRatingUser");
 
+// Back button
+// -----------------------------------------------------
 $("#backButton").on("click", function() {
     window.location.href = "/movies.html";
 });
 
-/* Average rating stars */
+// Average rating stars object
+// -----------------------------------------------------
 movieRatingAverage.rating({
     extendSymbol: function() {
 
@@ -54,7 +57,8 @@ movieRatingAverage.rating({
     }
 });
 
-/* Rating movie */
+// User rating object
+// -----------------------------------------------------
 movieRatingUser.rating({
     extendSymbol: function() {
 
@@ -77,7 +81,8 @@ movieRatingUser.rating({
     }
 });
 
-// Cast vote
+// Cast a vote
+// -----------------------------------------------------
 movieRatingUser.on("change", function() {
     $.ajax({
         type: "POST",
@@ -94,7 +99,8 @@ movieRatingUser.on("change", function() {
     });
 });
 
-/* Removing rating */
+// Removing rating
+// -----------------------------------------------------
 $("#removeRating").on("click", function() {
    // Remove rating
     $.ajax({
@@ -114,7 +120,8 @@ $("#removeRating").on("click", function() {
     });
 });
 
-/* Let's load the movie when page is loaded */
+// Let's load the movie data when page is loaded
+// -----------------------------------------------------
 $(document).ready(function() {
 
     $.ajax({
@@ -145,10 +152,6 @@ $(document).ready(function() {
                 getAverageRating(authToken, movieRatingAverage, movieRatingUser, movie.imdb, 1);
                 movieIMDB = movie.imdb;
             }
-        },
-        error: function()
-        {
-            window.location.href = "/login.html";
         }
     });
 });

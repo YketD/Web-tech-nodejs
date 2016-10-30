@@ -123,35 +123,35 @@ app.get("/api/rating", function(req, res) {
     var token = req.headers["authorization"];
     jwt.verify(token, app.get("private-key"), function(err, decoded) {
 
-        if (err) return res.status(401).send({ error: err });
-        else
+        // Validation
+        if (req.query.imdb === undefined)
+            return res.status(400).send();
+        else if (req.query.user !== undefined && req.query.user != 0)
         {
-            // Validation
-            if (req.query.imdb === undefined)
-                return res.status(400).send();
-            else if (req.query.user !== undefined && req.query.user != 0)
+            if (err) return res.status(401).send({ error: err });
+            else
             {
-                ratingModel.find({ user: decoded._doc._id, imdb: req.query.imdb }, function (err, result) {
-                        if (err) return res.status(400).send({ error: err });
-                        else return res.status(200).send({ result: result });
+                ratingModel.find({user: decoded._doc._id, imdb: req.query.imdb}, function (err, result) {
+                        if (err) return res.status(400).send({error: err});
+                        else return res.status(200).send({result: result});
                     }
                 );
             }
-            else
-            {
-                // Get average rating of movie
-                ratingModel.aggregate([
-                    { $group: { _id: "$imdb", avg: { $avg: "$rating" } } },
-                    { $match: { _id: req.query.imdb } }
-                ], function(err, result) {
-                    if (err)
-                        return res.status(400).send({error: err});
-                    else if (result == null || result.length < 1)
-                        return res.status(200).send({result: [{_id: req.query.imdb, avg: 0.0}]});
-                    else
-                        return res.status(200).send({result: result});
-                });
-            }
+        }
+        else
+        {
+            // Get average rating of movie
+            ratingModel.aggregate([
+                { $group: { _id: "$imdb", avg: { $avg: "$rating" } } },
+                { $match: { _id: req.query.imdb } }
+            ], function(err, result) {
+                if (err)
+                    return res.status(400).send({error: err});
+                else if (result == null || result.length < 1)
+                    return res.status(200).send({result: [{_id: req.query.imdb, avg: 0.0}]});
+                else
+                    return res.status(200).send({result: result});
+            });
         }
     });
 });
@@ -237,25 +237,17 @@ app.delete("/api/rating", function(req, res) {
 
 app.get("/api/movies", function(req, res) {
 
-    var token = req.headers["authorization"];
-    jwt.verify(token, app.get("private-key"), function(err, decoded) {
+    // Set up filter
+    var filter = {};
+    if (req.query.imdb !== undefined)
+        filter.imdb = req.query.imdb;
 
-        if (err) return res.status(401).send({ error: err });
-        else
-        {
-            // Set up filter
-            var filter = {};
-            if (req.query.imdb !== undefined)
-                filter.imdb = req.query.imdb;
-
-            // Get results from database
-            movieModel.find(filter, function (err, result) {
-                    if (err) return res.status(400).send({ error: err });
-                    else return res.status(200).send({ result: result });
-                }
-            ).limit(req.query.limit !== undefined ? parseInt(req.query.limit) : 0);
+    // Get results from database
+    movieModel.find(filter, function (err, result) {
+            if (err) return res.status(400).send({ error: err });
+            else return res.status(200).send({ result: result });
         }
-    });
+    ).limit(req.query.limit !== undefined ? parseInt(req.query.limit) : 0);
 });
 
 /* Start app */
