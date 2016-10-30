@@ -1,7 +1,7 @@
 /**
  * Created by yketd on 4-10-2016.
  */
-var Movie = require('./movieModel');
+var Movie = require("./movieModel");
 
 new Movie({
     title: 'Deepwater Horizon',

@@ -6,12 +6,13 @@ var bodyParser = require("body-parser");
 
 /* Data model */
 var movieModel = require("./api/movieModel");
-var ratingModel = require("./api/RatingModel");
-var userModel = require("./api/UserModel");
+var userModel = require("./api/userModel");
+var ratingModel = require("./api/ratingModel");
 
 /* First time runs (puts initial data into database) */
 //var Movie = require("./api/Movie");
 //var User = require("./api/User");
+//var Rating = require("./api/Rating");
 
 /* Web server */
 var app = express();
@@ -94,7 +95,7 @@ app.post("/api/login", function(req, res) {
     var loginQuery = {}
     loginQuery["password"] = req.body.password;
     loginQuery["username"] = req.body.username;
-    userModel.findOne(loginQuery, {}, function (err, result) {
+    userModel.findOne(loginQuery, {}, function(err, result) {
 
         // 400 on failure
         if (err) res.status(400).send({ error: err });
@@ -121,43 +122,56 @@ app.get("/api/rating", function(req, res) {
 
     var token = req.headers["authorization"];
     jwt.verify(token, app.get("private-key"), function(err, decoded) {
-        if (err) res.status(400).send({ error: err });
+
+        if (err) res.status(401).send({ error: err });
         else
         {
-            ratingModel.find(
-                {user: this.user},
-                {rating: 1, movie: 1},
-                function (err, results) {
-                    if (err) res.status(400).send({ error: err });
-                    else res.status(200).send(results);
+            // Validation
+            if (req.query.imdb === undefined)
+                res.status(400).send();
+            else
+            {
+                // Get average rating of movie
+                ratingModel.aggregate([
+                    { $group: { _id: "$imdb", avg: { $avg: "$rating" } } },
+                    { $match: { _id: req.query.imdb } }
+                ], function(err, result) {
+                    if (err) res.status(400).send({error: err});
+                    else res.status(200).send({result: result});
                 });
+            }
         }
-    })
+    });
 });
 
 app.post("/api/rating", function(req, res) {
 
     var token = req.headers["authorization"];
-    jwt.verify(token, app.get("private-key"), function (err, decoded) {
-        if (err) res.status(400).send({ error: err });
+    jwt.verify(token, app.get("private-key"), function(err, decoded) {
+
+        if (err) res.status(401).send({ error: err });
         else
         {
-            var rating = new ratingModel({
-                rating: req.body.rating,
-                user: this,
-                movie: req.body.movie,
+            // Validation
+            if (req.body.imdb === undefined)
+                res.status(400).send();
+            else if (req.body.rating === undefined)
+                res.status(400).send();
+
+            // Save rating
+            var newRating = new ratingModel({
+                rating: parseFloat(req.body.rating),
+                user: decoded._doc._id,
+                imdb: req.body.imdb,
                 date: Date.now()
             });
-            rating.save(function (err, result) {
+
+            newRating.save(function (err, result) {
                 if (err) res.status(400).send({ error: err });
-                else
-                {
-                    console.log("ratingmodel", "rating has been saved succesfully, result + " + result);
-                    res.status(201).send();
-                }
+                else res.status(200).send();
             });
         }
-    })
+    });
 });
 
 app.get("/api/movies", function(req, res) {
@@ -168,16 +182,22 @@ app.get("/api/movies", function(req, res) {
         if (err) res.status(401).send({ error: err });
         else
         {
-            movieModel.find(function (err, result) {
+            // Set up filter
+            var filter = {};
+            if (req.query.imdb !== undefined)
+                filter.imdb = req.query.imdb;
+
+            // Get results from database
+            movieModel.find(filter, function (err, result) {
                     if (err) res.status(400).send({ error: err });
                     else res.status(200).send({ result: result });
                 }
-            );
+            ).limit(req.query.limit !== undefined ? parseInt(req.query.limit) : 0);
         }
     });
 });
 
 /* Start app */
 app.listen(3000, function() {
-    console.log("NotFLix app listening");
+    console.log("NotFlix app listening");
 });

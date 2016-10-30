@@ -1,0 +1,16 @@
+/* Spacing between movie poster rows */
+#movies > .row > div {
+    margin-bottom: 2px;
+    cursor: pointer;
+}
+
+/* Poster zoom in on hover */
+#movies > .row > div > img {
+    transition: all .2s ease-in-out;
+}
+
+#movies > .row > div > img:hover {
+    transform: scale(1.1);
+    position: relative;
+    z-index: 2;
+}

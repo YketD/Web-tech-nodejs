@@ -6,20 +6,11 @@ if (authToken == null)
     window.location.href = "/login.html";
 }
 
-/* Function to load movie posters from omdb API */
-function loadPosterImage(image, imdb)
-{
-    $.ajax({
-        type: "GET",
-        url: "http://www.omdbapi.com/?plot=short&r=json&i=" + imdb,
-        cache: true,
-        success: function(data)
-        {
-            if (data != null && data.Poster !== undefined && data.Poster != "N/A")
-                $(image).attr("src", data.Poster);
-        }
-    });
-}
+var movieTitle = $("#movieTitle");
+var movieDesc = $("#movieDesc");
+var moviePoster = $("#moviePoster");
+var movieView = $("#movieView");
+var movieDetails = $("#movieDetails");
 
 /* Let's load the movies when page is loaded */
 $(document).ready(function() {
@@ -36,13 +27,11 @@ $(document).ready(function() {
             {
                 var movies = $("#movies");
                 var column = 0;
-                var count = 0;
 
                 var movieColumn;
-                var posterImage;
                 var lastRow;
 
-                $.each(data.result, function(key, value) {
+                $.each(data.result, function(key, movie) {
                     // Make a new row for every 4 movies
                     if (column++ < 1)
                     {
@@ -53,19 +42,35 @@ $(document).ready(function() {
                         column = 0;
 
                     // Add movie
-                    movieColumn = $('<div class="col-md-3"></div>');
-                    posterImage = $('<img src="http://placehold.it/300x445" alt="Poster" width="300" height="445" />');
+                    movie.posterImage = $('<img src="http://placehold.it/300x445" class="img-responsive img-rounded" alt="Poster" />');
 
-                    movieColumn.append(posterImage);
+                    movieColumn = $('<div class="col-md-3"></div>');
+                    movieColumn.on("click", function() { showMovieDetails(movie); });
+
+                    movieColumn.append(movie.posterImage);
                     lastRow.append(movieColumn);
 
-                    loadPosterImage(posterImage, value.imdb);
+                    // Load image in an ajax request
+                    loadPosterImage(movie.posterImage, movie.imdb);
                 });
             }
         },
         error: function()
         {
-            console.log("error");
+            window.location.href = "/login.html";
         }
     });
 });
+
+function showMovieDetails(movie)
+{
+    movieTitle.html(movie.title);
+    movieDesc.html(movie.description);
+    moviePoster.attr("src", movie.posterImage.attr("src"));
+    movieView.on("click", function() {
+        window.location.href = "/movie.html?imdb=" + movie.imdb;
+    });
+
+    // Show info to user
+    movieDetails.modal("show");
+}
