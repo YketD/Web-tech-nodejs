@@ -1,11 +1,9 @@
 /**
  * Created by yketd on 4-10-2016.
  */
-var mongoose = require('mongoose');
+var mongoose = require("mongoose");
 var schema = mongoose.Schema;
-var uniqueValidator = require('mongoose-unique-validator');
-
-
+var uniqueValidator = require("mongoose-unique-validator");
 
 var userSchema = new schema({
     username: {type: String, unique: true, required: true},
@@ -16,4 +14,4 @@ var userSchema = new schema({
 });
 userSchema.plugin(uniqueValidator);
 
-module.exports = mongoose.model('UserModel.js', userSchema);
+module.exports = mongoose.model("UserModel.js", userSchema);
